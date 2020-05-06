@@ -12,6 +12,7 @@ int member_count = 0;
 
 void Make_Account();
 void Deposit();
+void Withdraw();
 
 
 //메뉴 선택
@@ -41,7 +42,7 @@ void Select()
 			Deposit();
 			break;
 		case 3:
-			//출금
+			Withdraw();
 			break;
 		case 4:
 			//계좌정보 전체 출력
@@ -101,6 +102,43 @@ void Deposit()
 			member[i].balance += deposit;
 
 			cout << endl << member[i].cusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
+			cout << "잔액 : " << member[i].balance << "원" << endl;
+			return;
+		}
+	}
+	cout << "유효하지 않은 ID입니다." << endl;
+
+}
+
+//출    금
+void Withdraw()
+{
+	if (member_count == 0) {
+		cout << "현재 등록된 계좌가 없습니다." << endl;
+		return;
+	}
+	int ID;
+	int withdraw;
+
+	cout << "[출    금]" << endl;
+	cout << "계좌ID: ";
+	cin >> ID;
+	for (int i = 0; i < member_count; i++) {
+		if (member[i].accID == ID) {
+			cout << "출금액: ";
+			cin >> withdraw;
+			if (withdraw <= 0) {
+				cout << "출금액은 최소 1원 이상이여야 합니다." << endl;
+				return;
+			}
+			if (member[i].balance < withdraw) {
+				cout << "잔액이 부족합니다." << endl;
+				cout << "잔액 : " << member[i].balance << "원" << endl;
+				return;
+			}
+			member[i].balance -= withdraw;
+
+			cout << endl << member[i].cusName << " 고객님의 계좌에서 " << withdraw << "원이 출금되었습니다." << endl;
 			cout << "잔액 : " << member[i].balance << "원" << endl;
 			return;
 		}
