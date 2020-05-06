@@ -7,6 +7,7 @@ typedef struct
 	int balance; //ÀÜ¾× 
 	char cusName[NAME_LEN]; //°í°´ÀÌ¸§ 
 } Account;
+
 Account *member = new Account[100];
 int member_count = 0;
 
@@ -64,6 +65,10 @@ void Select()
 //°èÁÂ °³¼³
 void Make_Account()
 {
+	if (member_count >= 100) {
+		cout << "ÀºÇà¿¡ °¡ÀÔµÈ »ç¶÷ÀÌ ¸ðµÎ Ã¡½À´Ï´Ù." << endl;
+		return;
+	}
 	cout << "[°èÁÂ°³¼³]" << endl;
 	cout << "°èÁÂID: ";
 	cin >> member[member_count].accID;
