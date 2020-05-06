@@ -56,6 +56,7 @@ void Select()
 			Print_All();
 			break;
 		case 5:
+			if(member != NULL) delete[] member;
 			return;
 		}
 		cout << endl << endl;
