@@ -7,6 +7,9 @@ typedef struct
 	int balance; //잔액 
 	char cusName[NAME_LEN]; //고객이름 
 } Account;
+Account *member = new Account[100];
+int member_count = 0;
+
 //메뉴 선택
 void Select()
 {
@@ -43,6 +46,30 @@ void Select()
 			return;
 		}
 	}
+}
+
+//계좌 개설
+void Make_Account()
+{
+	cout << "[입    금]" << endl;
+	cout << "계좌ID: ";
+	cin >> member[member_count].accID;
+	for (int i = 0; i < member_count; i++) {
+		if (member[i].accID == member[member_count].accID) {
+			cout << "계좌번호가 중복됩니다." << endl;
+			return;
+		}
+	}
+	cout << "이  름: ";
+	cin >> member[member_count].cusName;
+	cout << "입금액: ";
+	cin >> member[member_count].balance;
+	if (member[member_count].balance < 10) {
+		cout << "계좌개설 시 10원 이상의 입금액이 필요합니다." << endl;
+		return;
+	}
+	
+	member_count++;
 }
 void main()
 {
