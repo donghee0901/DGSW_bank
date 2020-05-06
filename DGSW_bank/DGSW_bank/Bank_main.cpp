@@ -10,10 +10,17 @@ typedef struct
 Account *member = new Account[100];
 int member_count = 0;
 
+void Select();
 void Make_Account();
 void Deposit();
 void Withdraw();
+void Print_All();
 
+void main()
+{
+	//시작하자마자 메뉴 선택창으로 감
+	Select();
+}
 
 //메뉴 선택
 void Select()
@@ -45,7 +52,7 @@ void Select()
 			Withdraw();
 			break;
 		case 4:
-			//계좌정보 전체 출력
+			Print_All();
 			break;
 		case 5:
 			return;
@@ -74,7 +81,7 @@ void Make_Account()
 		cout << "계좌개설 시 최소 10원 이상의 입금액이 필요합니다." << endl;
 		return;
 	}
-	
+
 	member_count++;
 }
 
@@ -146,8 +153,17 @@ void Withdraw()
 	cout << "유효하지 않은 ID입니다." << endl;
 
 }
-void main()
+
+//계좌정보 전체 출력
+void Print_All()
 {
-	//시작하자마자 메뉴 선택창으로 감
-	Select();
+	if (member_count == 0) {
+		cout << "현재 등록된 계좌가 없습니다." << endl;
+		return;
+	}
+	for (int i = 0; i < member_count; i++) {
+		cout << "계좌ID: " << member[i].accID << endl;
+		cout << "이  름: " << member[i].cusName << endl;
+		cout << "잔  액: " << member[i].balance << endl << endl;
+	}
 }
