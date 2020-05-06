@@ -10,6 +10,10 @@ typedef struct
 Account *member = new Account[100];
 int member_count = 0;
 
+void Make_Account();
+void Deposit();
+
+
 //메뉴 선택
 void Select()
 {
@@ -31,10 +35,10 @@ void Select()
 		switch (select)
 		{
 		case 1:
-			//계좌개설
+			Make_Account();
 			break;
 		case 2:
-			//입금
+			Deposit();
 			break;
 		case 3:
 			//출금
@@ -45,13 +49,14 @@ void Select()
 		case 5:
 			return;
 		}
+		cout << endl << endl;
 	}
 }
 
 //계좌 개설
 void Make_Account()
 {
-	cout << "[입    금]" << endl;
+	cout << "[계좌개설]" << endl;
 	cout << "계좌ID: ";
 	cin >> member[member_count].accID;
 	for (int i = 0; i < member_count; i++) {
@@ -65,11 +70,43 @@ void Make_Account()
 	cout << "입금액: ";
 	cin >> member[member_count].balance;
 	if (member[member_count].balance < 10) {
-		cout << "계좌개설 시 10원 이상의 입금액이 필요합니다." << endl;
+		cout << "계좌개설 시 최소 10원 이상의 입금액이 필요합니다." << endl;
 		return;
 	}
 	
 	member_count++;
+}
+
+//입    금
+void Deposit()
+{
+	if (member_count == 0) {
+		cout << "현재 등록된 계좌가 없습니다." << endl;
+		return;
+	}
+	int ID;
+	int deposit;
+
+	cout << "[입    금]" << endl;
+	cout << "계좌ID: ";
+	cin >> ID;
+	for (int i = 0; i < member_count; i++) {
+		if (member[i].accID == ID) {
+			cout << "입금액: ";
+			cin >> deposit;
+			if (deposit <= 0) {
+				cout << "입금액은 최소 1원 이상이여야 합니다." << endl;
+				return;
+			}
+			member[i].balance += deposit;
+
+			cout << endl << member[i].cusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
+			cout << "잔액 : " << member[i].balance << "원" << endl;
+			return;
+		}
+	}
+	cout << "유효하지 않은 ID입니다." << endl;
+
 }
 void main()
 {
