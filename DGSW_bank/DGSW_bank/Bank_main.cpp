@@ -1,14 +1,79 @@
 #include<iostream>
 #define NAME_LEN 20
+#define SOCIALSECURITYNUMBER_LEN 15
 using namespace std;
-typedef struct
-{
-	int accID; //계좌번호 
-	int balance; //잔액 
-	char cusName[NAME_LEN]; //고객이름 
-} Account;
 
-Account *member = new Account[100];
+class Account
+{
+public:
+	//계좌 개설(생성자)
+	Account(int accID, int balance, char cusName[NAME_LEN], char socialSecurityNumber[SOCIALSECURITYNUMBER_LEN])
+	{
+		this->accID = accID;
+		this->balance = balance;
+		this->cusName = cusName;
+		this->socialSecurityNumber = socialSecurityNumber;
+	}
+
+	~Account()
+	{
+		delete socialSecurityNumber;
+		delete cusName;
+	}
+
+	bool Deposit(int deposit)
+	{
+		balance += deposit;
+		cout << endl << cusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
+		cout << "잔액 : " << balance << "원" << endl;
+		return true;
+	}
+	
+	bool Withdraw(int withdraw)
+	{
+		if (balance < withdraw) {
+			cout << "잔액이 부족합니다." << endl;
+			cout << "잔액 : " << balance << "원" << endl;
+			return false;
+		}
+		balance += withdraw;
+		cout << endl << cusName << " 고객님의 계좌에 " << withdraw << "원이 입금되었습니다." << endl;
+		cout << "잔액 : " << balance << "원" << endl;
+		return true;
+	}
+
+	void Print_All()
+	{
+		cout << "계좌ID: " << accID << endl;
+		cout << "이  름: " << cusName << endl;
+		cout << "잔  액: " << balance << endl << endl;
+		cout << "주민번호: " << socialSecurityNumber << endl << endl;
+	}
+
+	int getaccID()
+	{
+		return accID;
+	}
+	int getbalance()
+	{
+		return balance;
+	}
+	char* getcusName()
+	{
+		return cusName;
+	}
+	char* getsocialSecurityNumber()
+	{
+		return socialSecurityNumber;
+	}
+private:
+	int accID;
+	int balance;
+	char *cusName;
+	char *socialSecurityNumber;
+};
+
+Account *member[100];
 int member_count = 0;
 
 void Select();
@@ -66,24 +131,28 @@ void Select()
 //계좌 개설
 void Make_Account()
 {
+	int accID;
+	int balance;
+	char cusName[NAME_LEN];
+	char socialSecurityNumber[SOCIALSECURITYNUMBER_LEN];
 	if (member_count >= 100) {
 		cout << "은행에 가입된 사람이 모두 찼습니다." << endl;
 		return;
 	}
 	cout << "[계좌개설]" << endl;
 	cout << "계좌ID: ";
-	cin >> member[member_count].accID;
+	cin >> accID;
 	for (int i = 0; i < member_count; i++) {
-		if (member[i].accID == member[member_count].accID) {
+		if (member[i]->getaccID == member[member_count]->getaccID) {
 			cout << "계좌번호가 중복됩니다." << endl;
 			return;
 		}
 	}
 	cout << "이  름: ";
-	cin >> member[member_count].cusName;
+	cin >> cusName;
 	cout << "입금액: ";
-	cin >> member[member_count].balance;
-	if (member[member_count].balance < 10) {
+	cin >> balance;
+	if (balance < 10) {
 		cout << "계좌개설 시 최소 10원 이상의 입금액이 필요합니다." << endl;
 		return;
 	}
@@ -105,17 +174,17 @@ void Deposit()
 	cout << "계좌ID: ";
 	cin >> ID;
 	for (int i = 0; i < member_count; i++) {
-		if (member[i].accID == ID) {
+		if (member[i]->getaccID == ID) {
 			cout << "입금액: ";
 			cin >> deposit;
 			if (deposit <= 0) {
 				cout << "입금액은 최소 1원 이상이여야 합니다." << endl;
 				return;
 			}
-			member[i].balance += deposit;
+			member[i]->getbalance += deposit;
 
-			cout << endl << member[i].cusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
-			cout << "잔액 : " << member[i].balance << "원" << endl;
+			cout << endl << member[i]->getcusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
+			cout << "잔액 : " << member[i]->getbalance << "원" << endl;
 			return;
 		}
 	}
@@ -137,22 +206,22 @@ void Withdraw()
 	cout << "계좌ID: ";
 	cin >> ID;
 	for (int i = 0; i < member_count; i++) {
-		if (member[i].accID == ID) {
+		if (member[i]->getaccID == ID) {
 			cout << "출금액: ";
 			cin >> withdraw;
 			if (withdraw <= 0) {
 				cout << "출금액은 최소 1원 이상이여야 합니다." << endl;
 				return;
 			}
-			if (member[i].balance < withdraw) {
+			if (member[i]->getbalance < withdraw) {
 				cout << "잔액이 부족합니다." << endl;
-				cout << "잔액 : " << member[i].balance << "원" << endl;
+				cout << "잔액 : " << member[i]->getbalance << "원" << endl;
 				return;
 			}
-			member[i].balance -= withdraw;
+			member[i]->getbalance -= withdraw;
 
-			cout << endl << member[i].cusName << " 고객님의 계좌에서 " << withdraw << "원이 출금되었습니다." << endl;
-			cout << "잔액 : " << member[i].balance << "원" << endl;
+			cout << endl << member[i]->getcusName << " 고객님의 계좌에서 " << withdraw << "원이 출금되었습니다." << endl;
+			cout << "잔액 : " << member[i]->getbalance << "원" << endl;
 			return;
 		}
 	}
@@ -168,8 +237,6 @@ void Print_All()
 		return;
 	}
 	for (int i = 0; i < member_count; i++) {
-		cout << "계좌ID: " << member[i].accID << endl;
-		cout << "이  름: " << member[i].cusName << endl;
-		cout << "잔  액: " << member[i].balance << endl << endl;
+		member[i]->Print_All;
 	}
 }
