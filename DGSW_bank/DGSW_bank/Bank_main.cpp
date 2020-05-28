@@ -1,13 +1,15 @@
 #include<iostream>
+#include<cstring>
 #define NAME_LEN 20
 #define SOCIALSECURITYNUMBER_LEN 15
+#define MAX_ACCOUNT 100
 using namespace std;
 
 class Account
 {
 public:
 	//계좌 개설(생성자)
-	Account(int accID, int balance, char cusName[NAME_LEN], char socialSecurityNumber[SOCIALSECURITYNUMBER_LEN])
+	Account(int accID, int balance, char* cusName, char* socialSecurityNumber)
 	{
 		this->accID = accID;
 		this->balance = balance;
@@ -17,37 +19,49 @@ public:
 
 	~Account()
 	{
-		delete socialSecurityNumber;
-		delete cusName;
+		if (cusName != nullptr) delete cusName;
+		if (socialSecurityNumber != nullptr) delete socialSecurityNumber;
 	}
 
-	bool Deposit(int deposit)
+	void Deposit(int deposit)
 	{
+		if (deposit <= 0) {
+			cout << "입금액은 최소 1원 이상이여야 합니다." << endl;
+			return;
+		}
+
 		balance += deposit;
 		cout << endl << cusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
 		cout << "잔액 : " << balance << "원" << endl;
-		return true;
+		return;
 	}
 	
-	bool Withdraw(int withdraw)
+	void Withdraw(int withdraw)
 	{
 		if (balance < withdraw) {
 			cout << "잔액이 부족합니다." << endl;
 			cout << "잔액 : " << balance << "원" << endl;
-			return false;
+			return;
 		}
-		balance += withdraw;
-		cout << endl << cusName << " 고객님의 계좌에 " << withdraw << "원이 입금되었습니다." << endl;
+
+		if (withdraw <= 0) {
+			cout << "출금액은 최소 1원 이상이여야 합니다." << endl;
+			return;
+		}
+
+		balance -= withdraw;
+		cout << endl << cusName << " 고객님의 계좌에서 " << withdraw << "원이 출금되었습니다." << endl;
 		cout << "잔액 : " << balance << "원" << endl;
-		return true;
+		return;
 	}
 
 	void Print_All()
 	{
+		cout << endl;
 		cout << "계좌ID: " << accID << endl;
 		cout << "이  름: " << cusName << endl;
-		cout << "잔  액: " << balance << endl << endl;
-		cout << "주민번호: " << socialSecurityNumber << endl << endl;
+		cout << "잔  액: " << balance << endl;
+		cout << "주민번호: " << socialSecurityNumber << endl;
 	}
 
 	int getaccID()
@@ -73,9 +87,12 @@ private:
 	char *socialSecurityNumber;
 };
 
-Account *member[100];
+Account *member[MAX_ACCOUNT];
 int member_count = 0;
 
+bool Have_Account();
+int Select_AccID(int accID);
+int Select_SocialSecurityNumber(char* socialSecurityNumber);
 void Select();
 void Make_Account();
 void Deposit();
@@ -128,28 +145,66 @@ void Select()
 	}
 }
 
+//계좌 여부 확인
+bool Have_Account()
+{
+	if (member_count == 0) {
+		cout << "현재 등록된 계좌가 없습니다." << endl;
+		return false;
+	}
+	return true;
+}
+
+//accID 중복 확인
+int Select_AccID(int accID)
+{
+	for (int i = 0; i < member_count; i++) {
+		if (member[i]->getaccID() == accID) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+//주민번호 중복 확인
+int Select_SocialSecurityNumber(char* socialSecurityNumber)
+{
+	for (int i = 0; i < member_count; i++) {
+		if (strcmp(socialSecurityNumber, member[i]->getsocialSecurityNumber()) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 //계좌 개설
 void Make_Account()
 {
+	int select_ID;
+	int select_SocialSecurityNumber;
+
 	int accID;
 	int balance;
-	char cusName[NAME_LEN];
-	char socialSecurityNumber[SOCIALSECURITYNUMBER_LEN];
-	if (member_count >= 100) {
+	char *cusName = new char[NAME_LEN];
+	char *socialSecurityNumber = new char[SOCIALSECURITYNUMBER_LEN];
+
+	if (member_count >= MAX_ACCOUNT) {
 		cout << "은행에 가입된 사람이 모두 찼습니다." << endl;
 		return;
 	}
 	cout << "[계좌개설]" << endl;
 	cout << "계좌ID: ";
 	cin >> accID;
-	for (int i = 0; i < member_count; i++) {
-		if (member[i]->getaccID == member[member_count]->getaccID) {
-			cout << "계좌번호가 중복됩니다." << endl;
-			return;
-		}
+
+	select_ID = Select_AccID(accID);
+	if (select_ID >= 0) {
+		cout << "계좌번호가 중복됩니다." << endl;
+		return;
 	}
+
 	cout << "이  름: ";
 	cin >> cusName;
+
 	cout << "입금액: ";
 	cin >> balance;
 	if (balance < 10) {
@@ -157,86 +212,77 @@ void Make_Account()
 		return;
 	}
 
+	cout << "주민번호: ";
+	cin >> socialSecurityNumber;
+	
+	select_SocialSecurityNumber = Select_SocialSecurityNumber(socialSecurityNumber);
+	if (select_SocialSecurityNumber != -1) {
+		cout << "주민번호가 중복됩니다." << endl;
+		return;
+	}
+
+	member[member_count] = new Account(accID, balance, cusName, socialSecurityNumber);
+
 	member_count++;
 }
 
 //입    금
 void Deposit()
 {
-	if (member_count == 0) {
-		cout << "현재 등록된 계좌가 없습니다." << endl;
+	if (Have_Account() == false) {
 		return;
 	}
-	int ID;
+	int accID;
 	int deposit;
+	int select_ID;
 
 	cout << "[입    금]" << endl;
 	cout << "계좌ID: ";
-	cin >> ID;
-	for (int i = 0; i < member_count; i++) {
-		if (member[i]->getaccID == ID) {
-			cout << "입금액: ";
-			cin >> deposit;
-			if (deposit <= 0) {
-				cout << "입금액은 최소 1원 이상이여야 합니다." << endl;
-				return;
-			}
-			member[i]->getbalance += deposit;
+	cin >> accID;
 
-			cout << endl << member[i]->getcusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
-			cout << "잔액 : " << member[i]->getbalance << "원" << endl;
-			return;
-		}
+	select_ID = Select_AccID(accID);
+	if (select_ID == -1) {
+		cout << "유효하지 않은 ID입니다." << endl;
+		return;
 	}
-	cout << "유효하지 않은 ID입니다." << endl;
+	cout << "입금액: ";
+	cin >> deposit;
 
+	member[select_ID]->Deposit(deposit);
 }
 
 //출    금
 void Withdraw()
 {
-	if (member_count == 0) {
-		cout << "현재 등록된 계좌가 없습니다." << endl;
+	if (Have_Account() == false) {
 		return;
 	}
-	int ID;
+	int accID;
 	int withdraw;
+	int select_ID;
 
 	cout << "[출    금]" << endl;
 	cout << "계좌ID: ";
-	cin >> ID;
-	for (int i = 0; i < member_count; i++) {
-		if (member[i]->getaccID == ID) {
-			cout << "출금액: ";
-			cin >> withdraw;
-			if (withdraw <= 0) {
-				cout << "출금액은 최소 1원 이상이여야 합니다." << endl;
-				return;
-			}
-			if (member[i]->getbalance < withdraw) {
-				cout << "잔액이 부족합니다." << endl;
-				cout << "잔액 : " << member[i]->getbalance << "원" << endl;
-				return;
-			}
-			member[i]->getbalance -= withdraw;
+	cin >> accID;
 
-			cout << endl << member[i]->getcusName << " 고객님의 계좌에서 " << withdraw << "원이 출금되었습니다." << endl;
-			cout << "잔액 : " << member[i]->getbalance << "원" << endl;
-			return;
-		}
+	select_ID = Select_AccID(accID);
+	if (select_ID == -1) {
+		cout << "유효하지 않은 ID입니다." << endl;
+		return;
 	}
-	cout << "유효하지 않은 ID입니다." << endl;
+	cout << "출금액: ";
+	cin >> withdraw;
 
+	member[select_ID]->Withdraw(withdraw);
 }
 
 //계좌정보 전체 출력
 void Print_All()
 {
-	if (member_count == 0) {
-		cout << "현재 등록된 계좌가 없습니다." << endl;
+	if (Have_Account() == false) {
 		return;
 	}
 	for (int i = 0; i < member_count; i++) {
-		member[i]->Print_All;
+		member[i]->Print_All();
 	}
 }
