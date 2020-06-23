@@ -21,9 +21,7 @@ public:
 	{
 		cout << "Copy_Constructor" << endl;
 		this->balance = copy_member.balance;
-		char *name = new char[NAME_LEN];
-		strcpy_s(name, NAME_LEN, copy_member.cusName);
-		this->cusName = name;
+		strcpy_s(cusName, NAME_LEN, copy_member.cusName);
 		char *social = new char[SOCIALSECURITYNUMBER_LEN];
 		strcpy_s(social, SOCIALSECURITYNUMBER_LEN, copy_member.socialSecurityNumber);
 		this->socialSecurityNumber = social;
