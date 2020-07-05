@@ -4,8 +4,6 @@
 #define SOCIALSECURITYNUMBER_LEN 15
 #define MAX_ACCOUNT 100
 using namespace std;
-
-
 class Account
 {
 public:
@@ -16,7 +14,7 @@ public:
 		this->cusName = cusName;
 	}
 
-	//계좌 복사(복사생성자)
+	//복사생성자
 	Account(const Account &copy_member) :accID(copy_member.accID)
 	{
 		cout << "Copy_Constructor" << endl;
@@ -28,7 +26,7 @@ public:
 	}
 
 	//소멸자
-	~Account()
+	virtual ~Account()
 	{
 		if (cusName != nullptr) delete cusName;
 		if (socialSecurityNumber != nullptr) delete socialSecurityNumber;
@@ -41,6 +39,12 @@ public:
 		cout << endl;
 	}
 
+	//이자 계산
+	virtual int Calculate_Interest(int amount)
+	{
+		return (int)((float)amount * 0.01);
+	}
+
 	//입금(클래스 내 메소드)
 	void Deposit(int deposit)
 	{
@@ -51,8 +55,12 @@ public:
 		}
 
 		balance += deposit;
+
+		int interest = Calculate_Interest(balance);
+
 		Console_clear();
 		cout << endl << cusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
+		cout << endl << "이자 " << interest << "원이 추가되었습니다." << endl;
 		cout << "잔액 : " << balance << "원" << endl;
 		return;
 	}
@@ -66,7 +74,6 @@ public:
 			cout << "잔액 : " << balance << "원" << endl;
 			return;
 		}
-
 		if (withdraw <= 0) {
 			Console_clear();
 			cout << "출금액은 최소 1원 이상이여야 합니다." << endl;
@@ -81,9 +88,10 @@ public:
 	}
 
 	//계좌정보 출력(클래스 내 메소드)
-	void Print_All()
+	virtual void Print_All()
 	{
 		cout << endl;
+		cout << "계좌 종류: 보통 계좌" << endl;
 		cout << "계좌ID: " << accID << endl;
 		cout << "이  름: " << cusName << endl;
 		cout << "잔  액: " << balance << endl;
@@ -107,11 +115,35 @@ public:
 	{
 		return socialSecurityNumber;
 	}
-private:
+protected:
 	const int accID;
 	int balance;
 	char *cusName = nullptr;
 	const char *socialSecurityNumber = nullptr;
+};
+class DepositAccount : public Account
+{
+public:
+	DepositAccount(const Account &copy_member, int AccID) : Account(copy_member){
+
+	}
+
+	//이자 계산(재정의)
+	virtual int Calculate_Interest(int amount)
+	{
+		return (int)((float)amount * 0.02);
+	}
+
+	//계좌정보 출력(재정의)
+	virtual void Print_All()
+	{
+		cout << endl;
+		cout << "계좌 종류: 예금 계좌" << endl;
+		cout << "계좌ID: " << accID << endl;
+		cout << "이  름: " << cusName << endl;
+		cout << "잔  액: " << balance << endl;
+		cout << "주민번호: " << socialSecurityNumber << endl;
+	}
 };
 class AccountManager
 {
@@ -120,6 +152,22 @@ public:
 	{
 		for (int i = 0; i < MAX_ACCOUNT; i++) {
 			if (member[i] != nullptr) delete member[i];
+		}
+	}
+
+	//예금계좌 여부 입력받기
+	bool CinDepositWhether()
+	{
+		char scan;
+		cout << "계좌의 종류를 선택해주세요." << endl;
+		cout << "1. 보통계좌" << endl;
+		cout << "2. 예금계좌" << endl;
+		cin >> scan;
+		if (scan == 1)return false;
+		else if(scan == 2) return true;
+		else {
+			cout << "잘못된 입력" << endl << endl;
+			return CinDepositWhether();
 		}
 	}
 
@@ -165,6 +213,25 @@ public:
 	//계좌 개설
 	void Make_Account()
 	{
+		
+		if (member_count >= MAX_ACCOUNT) {
+			Console_clear();
+			cout << "은행에 가입된 사람이 모두 찼습니다." << endl;
+			return;
+		}
+		Console_clear();
+		cout << "[계좌개설]" << endl;
+		if (CinDepositWhether() == false){
+			Make_Ordinary_Account();
+		}
+		else {
+			Make_Deposit_Account();
+		}
+	}
+
+	//보통계좌 개설
+	void Make_Ordinary_Account()
+	{
 		int select_ID;
 		int select_SocialSecurityNumber;
 
@@ -173,13 +240,6 @@ public:
 		char *cusName = new char[NAME_LEN];
 		char *socialSecurityNumber = new char[SOCIALSECURITYNUMBER_LEN];
 
-		if (member_count >= MAX_ACCOUNT) {
-			Console_clear();
-			cout << "은행에 가입된 사람이 모두 찼습니다." << endl;
-			return;
-		}
-		Console_clear();
-		cout << "[계좌개설]" << endl;
 		cout << "계좌ID: ";
 		cin >> accID;
 
@@ -214,6 +274,36 @@ public:
 		member[member_count] = new Account(accID, balance, cusName, socialSecurityNumber);
 
 		member_count++;
+	}
+
+	//예금계좌 개설
+	void Make_Deposit_Account()
+	{
+		int select_ID;
+		int Original_accID;
+		int accID;
+
+		cout << "원본 계좌ID: ";
+		cin >> Original_accID;
+		select_ID = Select_AccID(Original_accID);
+		
+		if (select_ID == -1) {
+			Console_clear();
+			cout << "원본 계좌가 존재하지 않습니다." << endl;
+			return;
+		}
+
+		cout << "계좌ID: ";
+		cin >> accID;
+		select_ID = Select_AccID(accID);
+
+		if (select_ID >= 0) {
+			Console_clear();
+			cout << "계좌번호가 중복됩니다." << endl;
+			return;
+		}
+
+		member[member_count] = new DepositAccount(*member[select_ID]);
 	}
 
 	//입    금
@@ -285,6 +375,7 @@ public:
 private:
 	Account *member[MAX_ACCOUNT];
 	int member_count = 0;
+	int depositMember_count = 0;
 };
 AccountManager manager;
 
