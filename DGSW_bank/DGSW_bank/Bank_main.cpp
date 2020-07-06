@@ -8,15 +8,17 @@ class Account
 {
 public:
 	//계좌 개설(생성자)
-	Account(int input_accID, int input_balance, char* input_cusName, const char* input_socialSecurityNumber) :accID(input_accID), socialSecurityNumber(input_socialSecurityNumber)
+	Account(int input_accID, int input_balance, char* input_cusName, char* input_socialSecurityNumber) :accID(input_accID), socialSecurityNumber(input_socialSecurityNumber)
 	{
 		this->balance = input_balance;
 		this->cusName = input_cusName;
 	}
 
-	Account(int input_accID, char* input_cusName, char* input_socialSecurityNumber) : accID(input_accID)
+	//예금 계좌 개설(생성자 오버로딩)
+	Account(int input_accID, char* input_cusName, const char* input_socialSecurityNumber) : accID(input_accID)
 	{
 		this->balance = 0;
+		cusName = new char[NAME_LEN];
 		strcpy_s(cusName, NAME_LEN, input_cusName);
 		char *social = new char[SOCIALSECURITYNUMBER_LEN];
 		strcpy_s(social, SOCIALSECURITYNUMBER_LEN, input_socialSecurityNumber);
@@ -28,6 +30,7 @@ public:
 	{
 		cout << "Copy_Constructor" << endl;
 		this->balance = copy_member.balance;
+		cusName = new char[NAME_LEN];
 		strcpy_s(cusName, NAME_LEN, copy_member.cusName);
 		char *social = new char[SOCIALSECURITYNUMBER_LEN];
 		strcpy_s(social, SOCIALSECURITYNUMBER_LEN, copy_member.socialSecurityNumber);
@@ -66,6 +69,7 @@ public:
 		balance += deposit;
 
 		int interest = Calculate_Interest(balance);
+		balance += interest;
 
 		Console_clear();
 		cout << endl << cusName << " 고객님의 계좌에 " << deposit << "원이 입금되었습니다." << endl;
@@ -133,8 +137,15 @@ protected:
 class DepositAccount : public Account
 {
 public:
-	DepositAccount(Account &copy_member, int input_accID) : Account(input_accID, 0, copy_member.getcusName(), copy_member.getsocialSecurityNumber()){
+	//오버로딩된 부모 생성자를 이용하여 예금계좌 생성
+	DepositAccount(Account &copy_member, int input_accID) : Account(input_accID, copy_member.getcusName(), copy_member.getsocialSecurityNumber())
+	{
+		
+	}
 
+	~DepositAccount()
+	{
+		
 	}
 
 	//이자 계산(재정의)
@@ -289,14 +300,15 @@ public:
 	void Make_Deposit_Account()
 	{
 		int select_ID;
+		int select_Original_accID;
 		int Original_accID;
 		int accID;
 
 		cout << "원본 계좌ID: ";
 		cin >> Original_accID;
-		select_ID = Select_AccID(Original_accID);
+		select_Original_accID = Select_AccID(Original_accID);
 		
-		if (select_ID == -1) {
+		if (select_Original_accID == -1) {
 			Console_clear();
 			cout << "원본 계좌가 존재하지 않습니다." << endl;
 			return;
@@ -312,7 +324,9 @@ public:
 			return;
 		}
 
-		member[member_count] = new DepositAccount(*member[select_ID], accID);
+		member[member_count] = new DepositAccount(*member[select_Original_accID], accID);
+
+		member_count++;
 	}
 
 	//입    금
@@ -384,7 +398,6 @@ public:
 private:
 	Account *member[MAX_ACCOUNT];
 	int member_count = 0;
-	int depositMember_count = 0;
 };
 AccountManager manager;
 
