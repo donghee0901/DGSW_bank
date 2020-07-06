@@ -8,10 +8,19 @@ class Account
 {
 public:
 	//계좌 개설(생성자)
-	Account(int accID, int balance, char* cusName, char* socialSecurityNumber) :accID(accID), socialSecurityNumber(socialSecurityNumber)
+	Account(int input_accID, int input_balance, char* input_cusName, const char* input_socialSecurityNumber) :accID(input_accID), socialSecurityNumber(input_socialSecurityNumber)
 	{
-		this->balance = balance;
-		this->cusName = cusName;
+		this->balance = input_balance;
+		this->cusName = input_cusName;
+	}
+
+	Account(int input_accID, char* input_cusName, char* input_socialSecurityNumber) : accID(input_accID)
+	{
+		this->balance = 0;
+		strcpy_s(cusName, NAME_LEN, input_cusName);
+		char *social = new char[SOCIALSECURITYNUMBER_LEN];
+		strcpy_s(social, SOCIALSECURITYNUMBER_LEN, input_socialSecurityNumber);
+		this->socialSecurityNumber = social;
 	}
 
 	//복사생성자
@@ -124,7 +133,7 @@ protected:
 class DepositAccount : public Account
 {
 public:
-	DepositAccount(const Account &copy_member, int AccID) : Account(copy_member){
+	DepositAccount(Account &copy_member, int input_accID) : Account(input_accID, 0, copy_member.getcusName(), copy_member.getsocialSecurityNumber()){
 
 	}
 
@@ -163,8 +172,8 @@ public:
 		cout << "1. 보통계좌" << endl;
 		cout << "2. 예금계좌" << endl;
 		cin >> scan;
-		if (scan == 1)return false;
-		else if(scan == 2) return true;
+		if (scan == '1')return false;
+		else if(scan == '2') return true;
 		else {
 			cout << "잘못된 입력" << endl << endl;
 			return CinDepositWhether();
@@ -303,7 +312,7 @@ public:
 			return;
 		}
 
-		member[member_count] = new DepositAccount(*member[select_ID]);
+		member[member_count] = new DepositAccount(*member[select_ID], accID);
 	}
 
 	//입    금
