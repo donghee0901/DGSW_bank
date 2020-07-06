@@ -1,5 +1,14 @@
 #include<iostream>
 #include<cstring>
+#define _CRTDBG_MAP_ALLOC
+#include<cstdlib>
+#include<crtdbg.h>
+#ifdef _DEBUG
+#define DBG_NEW new(_NORMAL_BLOCK, _FILE_, _LINE_)
+#else
+#define DBG_NEW new
+#endif
+
 #define NAME_LEN 20
 #define SOCIALSECURITYNUMBER_LEN 15
 #define MAX_ACCOUNT 100
@@ -40,6 +49,7 @@ public:
 	//소멸자
 	virtual ~Account()
 	{
+		cout << "Account" << endl;
 		if (cusName != nullptr) delete cusName;
 		if (socialSecurityNumber != nullptr) delete socialSecurityNumber;
 	}
@@ -47,8 +57,8 @@ public:
 	//콘솔 지우기
 	void Console_clear()
 	{
-		system("cls");
-		cout << endl;
+		//system("cls");
+		//cout << endl;
 	}
 
 	//이자 계산
@@ -145,6 +155,7 @@ public:
 
 	~DepositAccount()
 	{
+		cout << "DepositAccount" << endl;
 		
 	}
 
@@ -170,8 +181,9 @@ class AccountManager
 public:
 	~AccountManager()
 	{
+		cout << "AccountManager" << endl;
 		for (int i = 0; i < MAX_ACCOUNT; i++) {
-			if (member[i] != nullptr) delete member[i];
+			if (member[i] != nullptr) delete[] member[i];
 		}
 	}
 
@@ -194,8 +206,8 @@ public:
 	//콘솔 지우기
 	void Console_clear()
 	{
-		system("cls");
-		cout << endl;
+		//system("cls");
+		//cout << endl;
 	}
 
 	//계좌 여부 확인
@@ -407,6 +419,8 @@ int main()
 {
 	//시작하자마자 메뉴 선택창으로 감
 	Select();
+	_CrtDumpMemoryLeaks();
+
 }
 //메뉴 선택
 void Select()
