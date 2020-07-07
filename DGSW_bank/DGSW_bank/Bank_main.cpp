@@ -182,7 +182,7 @@ public:
 	~AccountManager()
 	{
 		cout << "AccountManager" << endl;
-		for (int i = 0; i < MAX_ACCOUNT; i++) {
+		for (int i = 0; i < member_count; i++) {
 			if (member[i] != nullptr) delete[] member[i];
 		}
 	}
@@ -411,19 +411,20 @@ private:
 	Account *member[MAX_ACCOUNT];
 	int member_count = 0;
 };
-AccountManager manager;
 
-void Select();
+
+void Select(AccountManager &manager);
 
 int main()
 {
+	AccountManager manager;
 	//시작하자마자 메뉴 선택창으로 감
-	Select();
-	_CrtDumpMemoryLeaks();
+	Select(manager);
 
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_CRT_DF);
 }
 //메뉴 선택
-void Select()
+void Select(AccountManager &manager)
 {
 	int select;
 	//종료되지 않을 때 계속 돌림
